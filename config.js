@@ -5,13 +5,14 @@ const config = {
      * @param {String} instructions Initial instructions ID Custom model instructions that will guide the
      * model behevior
      */
-    instructions: 'Actúa como un experto en desarrollo de software con nodejs',
-
+    instructions: 'Eres un asistente de programación con javascript',
     /**
      * @param {String} model ID of the model to use. See the model endpoint compatibility table for
      * details on which models work with the Chat API. https://platform.openai.com/docs/modelsmodel-endpoint-compatibility 
      */
+
     model: 'gpt-3.5-turbo-1106',
+    //model: 'gpt-4-1106-preview',
 
     /**
      * @param {Number | null} frequency_penalty Number between -2.0 and 2.0. 
@@ -31,7 +32,7 @@ const config = {
      * like 0.2 will make it more focused and deterministic. 
      * We generally recommend altering this or top_p but not both.
      */
-    temperature: 1,
+    temperature: 0.5,
 
     /**
      * @param {Number | null} top_p An alternative to sampling with temperature, called nucleus sampling, 

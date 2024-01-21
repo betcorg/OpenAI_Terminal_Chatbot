@@ -1,8 +1,14 @@
 import 'dotenv/config';
 import OpenAI from 'openai';
 import chalk from 'chalk';
+import { marked } from 'marked';
+import { markedTerminal } from 'marked-terminal';
 import readline from 'readline';
 import config from './config.js';
+
+import fs from 'fs';
+
+marked.use(markedTerminal());
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -46,24 +52,56 @@ async function main() {
             temperature,
             stream,
         });
-
         // const response = completion.choices[0].message.content;
 
         console.log('');
         let response = '';
+
+        let codeBlock = [];
+
+        const openPattern = /```/;
+        const closePattern = /``/ || /```/;
         for await (const chunk of completion) {
-       
-            const chunkText = chunk.choices[0].delta.content;
-            if (typeof(chunkText) === 'undefined') {
+
+            const textChunk = chunk.choices[0].delta.content;
+
+            if (typeof (textChunk) === 'undefined') {
                 console.log('');
+
             } else {
-                process.stdout.write(chalk.blueBright(chunkText));
+
+                if (openPattern.test(textChunk)) {
+
+                    codeBlock.push(textChunk);
+                    response += textChunk;
+
+                } else if (codeBlock.length >= 1) {
+
+                    if (closePattern.test(textChunk)) {
+                        codeBlock.push(`${textChunk}\``);
+                        const formattedCodeBlock = marked.parse(codeBlock.join(''));
+                        console.log(chalk.bold(formattedCodeBlock));
+                        response += textChunk;
+                        codeBlock = [];
+
+                    } else {
+                        codeBlock.push(textChunk);
+                        response += textChunk;
+                    }
+
+                } else {
+                    if (textChunk.includes('`\n')) {
+
+                    } else {
+                        process.stdout.write(chalk.cyan(textChunk));
+                        response += textChunk;
+                    }
+                }
+
             }
-            response += chunkText;
         }
 
         messages.push({ role: "assistant", content: response });
-        // console.log('\x1b[34m%s\x1b[0m', '\n' + response);
     }
 }
 main();
