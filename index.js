@@ -6,14 +6,15 @@ import { markedTerminal } from 'marked-terminal';
 import readline from 'readline';
 import config from './config.js';
 
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
+
 const mtOptions = {
     code: chalk.green,
-
 }
 
 marked.use(markedTerminal(mtOptions));
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -33,7 +34,8 @@ const {
 if (instructions !== '') {
     messages.push({ role: "system", content: instructions });
 }
-async function askQuestion(question) {
+
+const askQuestion = (question) => {
     return new Promise((resolve) => {
         rl.question(question, (answer) => {
             messages.push({ role: "user", content: answer });
@@ -42,7 +44,9 @@ async function askQuestion(question) {
     });
 }
 
-async function main() {
+
+
+const main = async () => {
 
     let keepAsking = true;
     while (keepAsking) {
@@ -55,7 +59,6 @@ async function main() {
             temperature,
             stream,
         });
-        // const response = completion.choices[0].message.content;
 
         console.log('');
 
@@ -64,9 +67,9 @@ async function main() {
         let codeBlock = [];
         let codeLine = [];
 
-        const openPattern = /```/;
-        const closePattern = /``/;
+        const closingPattern = /``/;
         const codeDelimiter = /`/;
+        const openingPattern = /```/;
 
         for await (const chunk of completion) {
 
@@ -75,62 +78,63 @@ async function main() {
             if (typeof (textChunk) === 'undefined') {
                 console.log('');
 
-            } else {
+                // Handle code block formatting
+            } else if (openingPattern.test(textChunk)) {
 
-                if (openPattern.test(textChunk)) {
+                codeBlock.push(textChunk);
+                response += textChunk;
 
+            } else if (codeBlock.length > 0) {
+
+                if (closingPattern.test(textChunk)) {
+                    codeBlock.push(`${textChunk}\``);
+                    const formattedCodeBlock = marked.parse(codeBlock.join(''));
+                    process.stdout.write(chalk.bold(formattedCodeBlock));
+                    response += textChunk;
+                    codeBlock = [];
+
+                } else {
                     codeBlock.push(textChunk);
                     response += textChunk;
+                }
 
-                } else if (codeBlock.length > 0) {
+            } else if (textChunk.includes('`\n')) {
+                response += textChunk;
 
-                    if (closePattern.test(textChunk)) {
-                        codeBlock.push(`${textChunk}\``);
-                        const formattedCodeBlock = marked.parse(codeBlock.join(''));
-                        process.stdout.write(chalk.bold(formattedCodeBlock));
-                        response += textChunk;
-                        codeBlock = [];
 
-                    } else {
-                        codeBlock.push(textChunk);
-                        response += textChunk;
-                    }
+            } else {
 
-                } else if (textChunk.includes('`\n')) {
+
+                // Handle code line formatting
+                if (codeLine.length === 0 && codeDelimiter.test(textChunk)) {
+
+                    codeLine.push(textChunk);
                     response += textChunk;
+
+                } else if (codeLine.length > 0 && codeDelimiter.test(textChunk)) {
+                    codeLine.push(textChunk);
+                    // const formattedCodeLine = marked.parse(codeLine.join(''));
+                    process.stdout.write(chalk.bold.magentaBright(codeLine.join('')));
+                    response += textChunk;
+                    codeLine = [];
 
                 } else {
 
-                    if (codeLine.length === 0 && codeDelimiter.test(textChunk)) {
-
+                    if (codeLine.length > 0) {
                         codeLine.push(textChunk);
                         response += textChunk;
-
-                    } else if (codeLine.length > 0 && codeDelimiter.test(textChunk)) {
-                        codeLine.push(textChunk);
-                        // const formattedCodeLine = marked.parse(codeLine.join(''));
-                        process.stdout.write(chalk.bold.magentaBright(codeLine.join('')));
-                        response += textChunk;
-                        codeLine = [];
-
                     } else {
+                        process.stdout.write(chalk.white(textChunk));
+                        response += textChunk;
 
-                        if (codeLine.length > 0) {
-                            codeLine.push(textChunk);
-                            response += textChunk;
-                        } else {
-                            process.stdout.write(chalk.cyanBright(textChunk));
-                            response += textChunk;
-
-                        }
                     }
                 }
             }
         }
         messages.push({ role: "assistant", content: response });
     }
-
 }
+
 
 
 
