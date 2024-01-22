@@ -6,9 +6,12 @@ import { markedTerminal } from 'marked-terminal';
 import readline from 'readline';
 import config from './config.js';
 
-import fs from 'fs';
+const mtOptions = {
+    code: chalk.green,
 
-marked.use(markedTerminal());
+}
+
+marked.use(markedTerminal(mtOptions));
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -55,12 +58,16 @@ async function main() {
         // const response = completion.choices[0].message.content;
 
         console.log('');
+
         let response = '';
 
         let codeBlock = [];
+        let codeLine = [];
 
         const openPattern = /```/;
-        const closePattern = /``/ || /```/;
+        const closePattern = /``/;
+        const codeDelimiter = /`/;
+
         for await (const chunk of completion) {
 
             const textChunk = chunk.choices[0].delta.content;
@@ -75,12 +82,12 @@ async function main() {
                     codeBlock.push(textChunk);
                     response += textChunk;
 
-                } else if (codeBlock.length >= 1) {
+                } else if (codeBlock.length > 0) {
 
                     if (closePattern.test(textChunk)) {
                         codeBlock.push(`${textChunk}\``);
                         const formattedCodeBlock = marked.parse(codeBlock.join(''));
-                        console.log(chalk.bold(formattedCodeBlock));
+                        process.stdout.write(chalk.bold(formattedCodeBlock));
                         response += textChunk;
                         codeBlock = [];
 
@@ -89,19 +96,42 @@ async function main() {
                         response += textChunk;
                     }
 
+                } else if (textChunk.includes('`\n')) {
+                    response += textChunk;
+
                 } else {
-                    if (textChunk.includes('`\n')) {
+
+                    if (codeLine.length === 0 && codeDelimiter.test(textChunk)) {
+
+                        codeLine.push(textChunk);
+                        response += textChunk;
+
+                    } else if (codeLine.length > 0 && codeDelimiter.test(textChunk)) {
+                        codeLine.push(textChunk);
+                        // const formattedCodeLine = marked.parse(codeLine.join(''));
+                        process.stdout.write(chalk.bold.magentaBright(codeLine.join('')));
+                        response += textChunk;
+                        codeLine = [];
 
                     } else {
-                        process.stdout.write(chalk.cyan(textChunk));
-                        response += textChunk;
+
+                        if (codeLine.length > 0) {
+                            codeLine.push(textChunk);
+                            response += textChunk;
+                        } else {
+                            process.stdout.write(chalk.cyanBright(textChunk));
+                            response += textChunk;
+
+                        }
                     }
                 }
-
             }
         }
-
         messages.push({ role: "assistant", content: response });
     }
+
 }
+
+
+
 main();
