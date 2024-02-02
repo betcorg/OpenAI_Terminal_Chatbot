@@ -6,22 +6,10 @@ import { markedTerminal } from 'marked-terminal';
 import readline from 'readline';
 import config from './config.js';
 
+// Openai configs
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
-
-const mtOptions = {
-    code: chalk.green,
-}
-
-marked.use(markedTerminal(mtOptions));
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-});
-
-let messages = [];
 
 const {
     instructions,
@@ -31,9 +19,24 @@ const {
     model,
 } = config;
 
+let messages = [];
+
 if (instructions !== '') {
     messages.push({ role: "system", content: instructions });
 }
+
+// Formatter configs
+const mtOptions = {
+    code: chalk.green,
+};
+
+marked.use(markedTerminal(mtOptions));
+
+// Readline interface configs
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
 
 const askQuestion = (question) => {
     return new Promise((resolve) => {
@@ -43,6 +46,15 @@ const askQuestion = (question) => {
         });
     });
 }
+
+
+let codeBlock = [];
+let codeLine = [];
+let response = '';
+
+const openingPattern = /```/;
+const closingPattern = /``/;
+const codeDelimiter = /`/;
 
 
 
@@ -62,15 +74,6 @@ const main = async () => {
 
         console.log('');
 
-        let response = '';
-
-        let codeBlock = [];
-        let codeLine = [];
-
-        const closingPattern = /``/;
-        const codeDelimiter = /`/;
-        const openingPattern = /```/;
-
         for await (const chunk of completion) {
 
             const textChunk = chunk.choices[0].delta.content;
@@ -78,57 +81,58 @@ const main = async () => {
             if (typeof (textChunk) === 'undefined') {
                 console.log('');
 
+            } else {
+                
                 // Handle code block formatting
-            } else if (openingPattern.test(textChunk)) {
+                if (openingPattern.test(textChunk)) {
 
-                codeBlock.push(textChunk);
-                response += textChunk;
-
-            } else if (codeBlock.length > 0) {
-
-                if (closingPattern.test(textChunk)) {
-                    codeBlock.push(`${textChunk}\``);
-                    const formattedCodeBlock = marked.parse(codeBlock.join(''));
-                    process.stdout.write(chalk.bold(formattedCodeBlock));
-                    response += textChunk;
-                    codeBlock = [];
-
-                } else {
                     codeBlock.push(textChunk);
                     response += textChunk;
-                }
-
-            } else if (textChunk.includes('`\n')) {
-                response += textChunk;
-
-
-            } else {
-
-
-                // Handle code line formatting
-                if (codeLine.length === 0 && codeDelimiter.test(textChunk)) {
-
-                    codeLine.push(textChunk);
+    
+                } else if (codeBlock.length > 0) {
+    
+                    if (closingPattern.test(textChunk)) {
+                        codeBlock.push(`${textChunk}\``);
+                        const formattedCodeBlock = marked.parse(codeBlock.join(''));
+                        process.stdout.write(chalk.bold(formattedCodeBlock));
+                        response += textChunk;
+                        codeBlock = [];
+    
+                    } else {
+                        codeBlock.push(textChunk);
+                        response += textChunk;
+                    }
+    
+                } else if (textChunk.includes('`\n')) {
                     response += textChunk;
-
-                } else if (codeLine.length > 0 && codeDelimiter.test(textChunk)) {
-                    codeLine.push(textChunk);
-                    // const formattedCodeLine = marked.parse(codeLine.join(''));
-                    process.stdout.write(chalk.bold.magentaBright(codeLine.join('')));
-                    response += textChunk;
-                    codeLine = [];
-
+    
                 } else {
-
-                    if (codeLine.length > 0) {
+    
+                    // Handle code line formatting
+                    if (codeLine.length === 0 && codeDelimiter.test(textChunk)) {
+    
                         codeLine.push(textChunk);
                         response += textChunk;
-                    } else {
-                        process.stdout.write(chalk.white(textChunk));
+    
+                    } else if (codeLine.length > 0 && codeDelimiter.test(textChunk)) {
+                        codeLine.push(textChunk);
+                        // const formattedCodeLine = marked.parse(codeLine.join(''));
+                        process.stdout.write(chalk.bold.magentaBright(codeLine.join('')));
                         response += textChunk;
-
+                        codeLine = [];
+    
+                    } else {
+    
+                        if (codeLine.length > 0) {
+                            codeLine.push(textChunk);
+                            response += textChunk;
+                        } else {
+                            process.stdout.write(chalk.white(textChunk));
+                            response += textChunk;
+                        }
                     }
                 }
+
             }
         }
         messages.push({ role: "assistant", content: response });
