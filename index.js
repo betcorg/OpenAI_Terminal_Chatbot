@@ -1,7 +1,7 @@
 import 'dotenv/config.js';
-import chalk from 'chalk';
 import readline from 'readline';
-import config from './config.js';
+import chalk from 'chalk';
+import {config} from './config.js';
 
 import * as openai from './src/openai/openai.js';
 
@@ -13,7 +13,6 @@ if (instructions !== '') {
     messages.push({ role: "system", content: instructions });
 }
 
-// Readline interface configs
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,

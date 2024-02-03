@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const search_on_google_tool = {
+export const search_on_google = {
 	"type": "function",
 	"function": {
 		"name": "search_on_google",
@@ -29,7 +29,7 @@ export const search_on_google_tool = {
 
 export const searchOnGoogle = async (args) => {
 
-	console.log(args);
+	// console.log(args);
 	const params = {
 		key: process.env.GOOGLE_SEARCH_API_KEY,
 		cx: process.env.GOOGLE_SEARCH_CX,

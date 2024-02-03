@@ -1,6 +1,6 @@
 import axios from'axios';
 
-export const get_current_weather_tool = {
+export const get_current_weather = {
 	"type": "function",
 	"function": {
 		"name": "get_current_weather",
@@ -19,7 +19,6 @@ export const get_current_weather_tool = {
 	}
 }
 
-
 export const getCurrentWeather = async (args) => {
 
 	try {
@@ -27,8 +26,8 @@ export const getCurrentWeather = async (args) => {
 			'https://api.weatherapi.com/v1/current.json',
 			{
 				params: {
-					q: args.location,
 					key: process.env.WEATHER_API_KEY,
+					q: args.location,
 				}
 			}
 		);
