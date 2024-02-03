@@ -1,5 +1,9 @@
+import { get_current_weather, getCurrentWeather } from './src/plugins/getCurrentWeather.js';
+import { get_webpage_summary, getWebPageSummary } from './src/plugins/getWebSummary.js';
+import {  search_on_google, searchOnGoogle } from './src/plugins/googleSearch.js';
 
-const config = {
+
+export const config = {
 
     /**
      * @param {String} instructions Initial instructions ID Custom model instructions that will guide the
@@ -61,6 +65,20 @@ const config = {
     */
     stream: true,
 
+
+    tool_choice: 'auto',
+
 };
 
-export default config;
+export const tools = [
+    get_current_weather,
+    search_on_google,
+    get_webpage_summary,
+];
+
+export const functions = {
+  get_current_weather: getCurrentWeather,
+  search_on_google: searchOnGoogle,
+  get_webpage_summary: getWebPageSummary,
+};
+

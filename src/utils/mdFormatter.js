@@ -73,8 +73,6 @@ export const chunkFormatter = async (textChunk) => {
                 }
             }
         }
-
     }
-
     return response;
 }
