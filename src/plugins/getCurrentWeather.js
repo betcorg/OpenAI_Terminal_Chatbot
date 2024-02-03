@@ -34,12 +34,11 @@ export const getCurrentWeather = async (args) => {
 		);
 		const weather = response.data;
 
-		const { condition, temp_c, temp_f } = weather.current;
-
-		const unit = args.unit !== 'fahrenheith' ? 'celsius' : 'fahrenheith';
-		const temperature = unit === 'celsius' ? temp_c : temp_f;
-
-		return { temperature, unit, condition: condition.text };
+		return weather.current;
+		// const { condition, temp_c, temp_f } = weather.current;
+		// const unit = args.unit !== 'fahrenheith' ? 'celsius' : 'fahrenheith';
+		// const temperature = unit === 'celsius' ? temp_c : temp_f;
+		// return { temperature, unit, condition: condition.text };
 
 	} catch (error) {
 		console.error(error.message);
