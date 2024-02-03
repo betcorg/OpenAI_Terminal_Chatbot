@@ -1,7 +1,7 @@
 
 import {functions, config} from '../../config.js';
 import { chunkFormatter } from '../utils/mdFormatter.js';
-import { delay } from '../utils/delay.js';
+// import { delay } from '../utils/delay.js';
 
 
 const {model, stream} = config;
@@ -39,15 +39,17 @@ export const handleToolCall = async (tools, messages, openai) => {
         const currentFunction = functions[name];
         const functionResponse = await currentFunction(JSON.parse(args));
 
-        if (name === 'get_webpage_summary') {
-            let response = '';
-            for (const sentence of functionResponse.sentences) {
-                await delay(30);
-                response = await chunkFormatter(sentence);
-            }
-            messages.push({ role: "assistant", content: response });
-            return;
-        }
+        // This passes the summary text obtained by 'get_webpage_summary' tool straight to the 
+        // output stream without being processed by the model
+        // if (name === 'get_webpage_summary') {
+        //     let response = '';
+        //     for (const sentence of functionResponse.sentences) {
+        //         await delay(30);
+        //         response = await chunkFormatter(sentence);
+        //     }
+        //     messages.push({ role: "assistant", content: response });
+        //     return;
+        // }
 
         toolMessage.push({
             tool_call_id: id,
