@@ -1,15 +1,16 @@
-import 'dotenv/config';
 import OpenAI from 'openai';
 import config from '../../config.js';
+import { chunkFormatter } from '../mdFormatter.js';
 
 const openai = new OpenAI();
 
 import { getCurrentWeather, get_current_weather_tool } from '../plugins/getCurrentWeather.js';
 import { searchOnGoogle, search_on_google_tool } from '../plugins/googleSearch.js';
-import { isItToolCall, getToolData } from '../utils/getToolData.js';
+import { getWebPageSummary, get_webpage_summary_tool } from '../plugins/getWebSummary.js';
+import { isItToolCall, getToolsData } from '../utils/getToolsData.js';
 
 
-export let {
+export const {
     temperature,
     max_tokens,
     stream,
@@ -17,17 +18,21 @@ export let {
 } = config;
 
 const tools = [
-    search_on_google_tool,
     get_current_weather_tool,
+    search_on_google_tool,
+    get_webpage_summary_tool,
 ];
 
 const functions = {
     get_current_weather: getCurrentWeather,
     search_on_google: searchOnGoogle,
+    get_webpage_summary: getWebPageSummary,
 };
 
+const delay = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const createChatCompletion = async (messages) => {
-    const originalMessages = messages;
+
     const toolMessage = [...messages]
     toolMessage.shift();
 
@@ -41,13 +46,15 @@ export const createChatCompletion = async (messages) => {
         stream,
     });
 
-    const [streamRes, toolStream] = response.tee();
+    const [responseStream, toolStream] = response.tee();
 
-    const isToolCall = await isItToolCall(streamRes);
+    const result = await isItToolCall(responseStream);
 
-    if (isToolCall) {
+    if (result.tool) {
 
-        const tools = await getToolData(toolStream);
+        const tools = await getToolsData(toolStream);
+        // console.log(tools);
+
 
         const toolResponse = {
             "role": "assistant",
@@ -67,6 +74,7 @@ export const createChatCompletion = async (messages) => {
                 }
             });
         });
+
         toolMessage.push(toolResponse);
 
         for (const tool of tools) {
@@ -76,32 +84,51 @@ export const createChatCompletion = async (messages) => {
             const currentFunction = functions[name];
             const functionResponse = await currentFunction(JSON.parse(args));
 
+            if (name === 'get_webpage_summary') {
+                let response = '';
+                for (const sentence of functionResponse.sentences) {
+                    await delay(30);
+                    response = await chunkFormatter(sentence);
+                }
+                messages.push({ role: "assistant", content: response });
+                return;
+            }
+
             toolMessage.push({
                 tool_call_id: id,
                 role: 'tool',
                 name: name,
                 content: JSON.stringify(functionResponse),
             });
+            
         }
 
         const secondResponse = await openai.chat.completions.create({
             model,
             messages: toolMessage,
-            max_tokens: 200,
+            max_tokens: 1000,
             temperature: 0.5,
             stream,
         });
 
-        return secondResponse;
+        let response = '';
+        for await (const chunk of secondResponse) {
+            const textChunk = chunk.choices[0].delta.content;
+            response = await chunkFormatter(textChunk);
+        }
+
+        messages.push({ role: "assistant", content: response });
 
     } else {
-        return  await openai.chat.completions.create({
-            model,
-            messages: originalMessages,
-            max_tokens,
-            temperature,
-            stream,
-        });
+
+        let response = '';
+
+        for (const chunk of result.chunks) {
+            const textChunk = chunk.choices[0].delta.content;
+            await delay(20);
+            response = await chunkFormatter(textChunk);
+        }
+        messages.push({ role: "assistant", content: response });
     }
 }
 

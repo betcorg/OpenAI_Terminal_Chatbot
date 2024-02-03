@@ -1,10 +1,9 @@
+import 'dotenv/config.js';
 import chalk from 'chalk';
 import readline from 'readline';
 import config from './config.js';
-import {chunkFormatter} from './src/mdFormatter.js';
+
 import * as openai from './src/openai/openai.js';
-
-
 
 const {instructions, model} = config;
 
@@ -36,18 +35,8 @@ const main = async () => {
     while (keepAsking) {
         await askQuestion(chalk.bold.green(`\n${model} >>> `));
         console.log('');
-
-        const completion = await openai.createChatCompletion(messages);
-        
-        let response = '';
-        for await (const chunk of completion) {
-            const textChunk = chunk.choices[0].delta.content;
-            response = await chunkFormatter(textChunk);            
-        }
-
-        messages.push({ role: "assistant", content: response });
+        await openai.createChatCompletion(messages);
     }
 }
-
 
 main();
