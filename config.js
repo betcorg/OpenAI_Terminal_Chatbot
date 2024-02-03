@@ -5,14 +5,14 @@ const config = {
      * @param {String} instructions Initial instructions ID Custom model instructions that will guide the
      * model behevior
      */
-    instructions: 'Eres un asistente de programación con javascript',
+    instructions: 'Eres un asistente de programación con javascript, experto en desarrollo backend con el stack MERN, e integraciones con redes neuronales desarrolladas en bibliotecas de javascript como tensorflow.js, brain.js, compromise, natural y otras bibliotecas relacionadas. También tienes conocimientos en React y tailwindcss y lo que se refiere al desarrollo de UX/UI con las texnologías mencionadas',
     /**
      * @param {String} model ID of the model to use. See the model endpoint compatibility table for
      * details on which models work with the Chat API. https://platform.openai.com/docs/modelsmodel-endpoint-compatibility 
      */
 
-    model: 'gpt-3.5-turbo-1106',
-    //model: 'gpt-4-1106-preview',
+      model: 'gpt-3.5-turbo-0125',
+    //model: 'gpt-4-turbo-preview',
 
     /**
      * @param {Number | null} frequency_penalty Number between -2.0 and 2.0. 
