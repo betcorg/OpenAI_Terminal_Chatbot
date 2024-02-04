@@ -20,7 +20,7 @@ const {
 
 export const createChatCompletion = async (messages) => {
 
-    const response = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
         model,
         messages,
         tools,
@@ -30,7 +30,7 @@ export const createChatCompletion = async (messages) => {
         stream,
     });
 
-    const [responseStream, toolStream] = response.tee();
+    const [responseStream, toolStream] = completion.tee();
 
     const result = await isItToolCall(responseStream);
 
@@ -48,9 +48,11 @@ export const createChatCompletion = async (messages) => {
         for (const chunk of result.chunks) {
             const textChunk = chunk.choices[0].delta.content;
             await delay(20);
-            response = await chunkFormatter(textChunk);
+            response = await chunkFormatter(textChunk, response);
         }
+
         messages.push({ role: "assistant", content: response });
     }
+    
 }
 

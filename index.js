@@ -35,6 +35,7 @@ const main = async () => {
         await askQuestion(chalk.bold.green(`\n${model} >>> `));
         console.log('');
         await openai.createChatCompletion(messages);
+        console.log(messages);
     }
 }
 
