@@ -46,7 +46,7 @@ export const handleToolCall = async (tools, messages, openai) => {
         });
     }
 
-    console.log(toolMessage);
+    // console.log(toolMessage);
     const secondResponse = await openai.chat.completions.create({
         model,
         messages: toolMessage,
@@ -60,7 +60,6 @@ export const handleToolCall = async (tools, messages, openai) => {
         const textChunk = chunk.choices[0].delta.content;
         response = await chunkFormatter(textChunk, response);
     }
-
-    // console.log(response);
+    
     messages.push({ role: "assistant", content: response });
 }
