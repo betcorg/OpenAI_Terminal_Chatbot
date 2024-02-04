@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import { marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 
-// Formatter configs
 const mtOptions = {
     code: chalk.green,
 };
@@ -11,13 +10,13 @@ marked.use(markedTerminal(mtOptions));
 
 let codeBlock = [];
 let codeLine = [];
-let response = '';
+// let response = '';
 
 const openingPattern = /```/;
 const closingPattern = /``/;
 const codeDelimiter = /`/;
 
-export const chunkFormatter = async (textChunk) => {
+export const chunkFormatter = async (textChunk, response) => {
 
     if (typeof (textChunk) === 'undefined') {
         console.log('');

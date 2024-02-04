@@ -7,10 +7,9 @@ import { chunkFormatter } from '../utils/mdFormatter.js';
 const {model, stream} = config;
 
 export const handleToolCall = async (tools, messages, openai) => {
-
-    const toolMessage = [...messages]
-    toolMessage.shift();
-
+    
+    const toolMessage = [messages[messages.length-1]];
+ 
     const toolResponse = {
         "role": "assistant",
         "content": null,
@@ -39,18 +38,6 @@ export const handleToolCall = async (tools, messages, openai) => {
         const currentFunction = functions[name];
         const functionResponse = await currentFunction(JSON.parse(args));
 
-        // This passes the summary text obtained by 'get_webpage_summary' tool straight to the 
-        // output stream without being processed by the model
-        // if (name === 'get_webpage_summary') {
-        //     let response = '';
-        //     for (const sentence of functionResponse.sentences) {
-        //         await delay(30);
-        //         response = await chunkFormatter(sentence);
-        //     }
-        //     messages.push({ role: "assistant", content: response });
-        //     return;
-        // }
-
         toolMessage.push({
             tool_call_id: id,
             role: 'tool',
@@ -59,6 +46,7 @@ export const handleToolCall = async (tools, messages, openai) => {
         });
     }
 
+    console.log(toolMessage);
     const secondResponse = await openai.chat.completions.create({
         model,
         messages: toolMessage,
@@ -70,8 +58,9 @@ export const handleToolCall = async (tools, messages, openai) => {
     let response = '';
     for await (const chunk of secondResponse) {
         const textChunk = chunk.choices[0].delta.content;
-        response = await chunkFormatter(textChunk);
+        response = await chunkFormatter(textChunk, response);
     }
 
+    // console.log(response);
     messages.push({ role: "assistant", content: response });
 }
