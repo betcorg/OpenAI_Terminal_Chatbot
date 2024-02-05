@@ -10,16 +10,12 @@ const { instructions, model } = config;
 let messages = [];
 
 if (instructions !== '') {
-
     messages.push({ role: "system", content: instructions });
-
 }
 
 const rl = readline.createInterface({
-
     input: process.stdin,
     output: process.stdout,
-
 });
 
 const getUserQuery = (query) => {
@@ -30,13 +26,11 @@ const getUserQuery = (query) => {
             resolve(userQuery);
         });
     });
-
 }
 
 const main = async () => {
 
     let isPromptAlive = true;
-
     while (isPromptAlive) {
 
         await getUserQuery(chalk.bold.green(`\n${model} >>> `));
@@ -44,7 +38,6 @@ const main = async () => {
         await openai.createChatCompletion(messages);
         // console.log(messages);
     }
-    
 }
 
 main();

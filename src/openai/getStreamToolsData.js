@@ -4,7 +4,6 @@ export const isItToolCall = async (stream) => {
     let chunks = [];
 
     for await (const chunk of stream) {
-
         if (chunk.choices[0].delta.tool_calls) {
             return { tool: true };
         } else {
@@ -19,9 +18,7 @@ export const isItToolCall = async (stream) => {
 export const getToolsData = async (stream) => {
 
     let toolCalls = [];
-
     for await (const chunk of stream) {
-
         let delta = chunk.choices[0].delta;
 
         if (delta.tool_calls && delta.tool_calls !== 'undefined') {
@@ -36,7 +33,7 @@ export const getToolsData = async (stream) => {
         }
 
         result[toolCall.index].push(toolCall);
-        
+
         return result;
 
     }, []);
