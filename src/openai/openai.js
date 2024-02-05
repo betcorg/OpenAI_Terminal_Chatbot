@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-const openai = new OpenAI();
+const openaiModel = new OpenAI();
 
 import { chunkFormatter } from '../utils/mdFormatter.js';
 import { isItToolCall, getToolsData } from './getStreamToolsData.js';
@@ -20,7 +20,7 @@ const {
 
 export const createChatCompletion = async (messages) => {
 
-    const completion = await openai.chat.completions.create({
+    const completion = await openaiModel.chat.completions.create({
         model,
         messages,
         tools,
@@ -39,7 +39,7 @@ export const createChatCompletion = async (messages) => {
         const currentTools = await getToolsData(toolStream);
         // console.log(tools);
 
-        await handleToolCall(currentTools, messages, openai);
+        await handleToolCall(currentTools, messages, openaiModel);
 
     } else {
 
