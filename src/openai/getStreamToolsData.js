@@ -36,6 +36,7 @@ export const getToolsData = async (stream) => {
         }
 
         result[toolCall.index].push(toolCall);
+        
         return result;
 
     }, []);

@@ -7,8 +7,7 @@ import { get_currency_exchange, getCurrencyExchange } from './src/plugins/getCur
 export const config = {
 
   /**
-   * @param {String} instructions Initial instructions ID Custom model instructions that will guide the
-   * model behevior
+   * @param {String} instructions Initial instructions that will guide the model behevior
    */
   instructions: 'Eres un asistente de programación con javascript, experto en desarrollo backend con el stack MERN, e integraciones con redes neuronales desarrolladas en bibliotecas de javascript como tensorflow.js, brain.js, compromise, natural y otras bibliotecas relacionadas. También tienes conocimientos en React y tailwindcss y lo que se refiere al desarrollo de UX/UI con las texnologías mencionadas',
   /**
