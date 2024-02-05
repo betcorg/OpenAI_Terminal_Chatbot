@@ -35,10 +35,8 @@ export const createChatCompletion = async (messages) => {
     const result = await isItToolCall(responseStream);
 
     if (result.tool) {
-
         const currentTools = await getToolsData(toolStream);
         // console.log(tools);
-
         await handleToolCall(currentTools, messages, openaiModel);
 
     } else {

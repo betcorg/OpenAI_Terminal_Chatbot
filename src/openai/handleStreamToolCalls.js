@@ -32,8 +32,8 @@ export const handleToolCall = async (tools, messages, openai) => {
         });
     });
 
-    // Logs the tools that the model decided to use. You can comment this line for better user experience
-    console.log(toolResponse.tool_calls);
+    // Logs the tools that the model decided to use. 
+    // console.log(toolResponse.tool_calls);
 
     toolMessage.push(toolResponse);
 
@@ -45,34 +45,28 @@ export const handleToolCall = async (tools, messages, openai) => {
         const functionResponse = await currentFunction(JSON.parse(args));
 
         toolMessage.push({
-
             tool_call_id: id,
             role: 'tool',
             name: name,
             content: JSON.stringify(functionResponse),
-
         });
     }
 
-    // Logs the response recieved from the functions executed by each tool. You can comment this line for better user experience
-    console.log(toolMessage[toolMessage.length - 1]);
+    // Logs the response recieved from the functions executed by each tool. 
+    // console.log(toolMessage);
 
     const secondResponse = await openai.chat.completions.create({
-
         model,
         messages: toolMessage,
         max_tokens: 1000,
         temperature: 0.5,
         stream,
-
     });
 
     let response = '';
     for await (const chunk of secondResponse) {
-
         const textChunk = chunk.choices[0].delta.content;
         response = await chunkFormatter(textChunk, response);
-
     }
 
     messages.push({ role: "assistant", content: response });
