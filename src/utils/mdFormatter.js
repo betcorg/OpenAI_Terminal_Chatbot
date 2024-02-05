@@ -22,7 +22,7 @@ export const chunkFormatter = async (textChunk, response) => {
         console.log('');
 
     } else {
-        
+
         // Handle code block formatting
         if (openingPattern.test(textChunk)) {
 
@@ -39,11 +39,13 @@ export const chunkFormatter = async (textChunk, response) => {
                 codeBlock = [];
 
             } else {
+
                 codeBlock.push(textChunk);
                 response += textChunk;
             }
 
         } else if (textChunk.includes('`\n')) {
+
             response += textChunk;
 
         } else {
@@ -55,8 +57,8 @@ export const chunkFormatter = async (textChunk, response) => {
                 response += textChunk;
 
             } else if (codeLine.length > 0 && codeDelimiter.test(textChunk)) {
+
                 codeLine.push(textChunk);
-                // const formattedCodeLine = marked.parse(codeLine.join(''));
                 process.stdout.write(chalk.bold.magentaBright(codeLine.join('')));
                 response += textChunk;
                 codeLine = [];
@@ -64,11 +66,15 @@ export const chunkFormatter = async (textChunk, response) => {
             } else {
 
                 if (codeLine.length > 0) {
+
                     codeLine.push(textChunk);
                     response += textChunk;
+
                 } else {
+
                     process.stdout.write(chalk.white(textChunk));
                     response += textChunk;
+
                 }
             }
         }
