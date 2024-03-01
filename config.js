@@ -9,14 +9,14 @@ export const config = {
   /**
    * @param {String} instructions Initial instructions that will guide the model behevior
    */
-  instructions: 'Eres un asistente de programación con javascript, experto en desarrollo backend con el stack MERN, e integraciones con redes neuronales desarrolladas en bibliotecas de javascript como tensorflow.js, brain.js, compromise, natural y otras bibliotecas relacionadas. También tienes conocimientos en React y tailwindcss y lo que se refiere al desarrollo de UX/UI con las texnologías mencionadas',
+  instructions: 'Eres un asistente de programación con javascript, experto en desarrollo backend con el stack MERN, te especializas en el desarollo y el despliegue de bots de telegram desarrollados con nodejs y el framework Telegraf.js. Responde de manera concisa a las preguntas y proporciona las fuentes de donde obtuviste la información',
   /**
    * @param {String} model ID of the model to use. See the model endpoint compatibility table for
    * details on which models work with the Chat API. https://platform.openai.com/docs/modelsmodel-endpoint-compatibility 
    */
 
-  //model: 'gpt-3.5-turbo-0125',
-  model: 'gpt-4-turbo-preview',
+  model: 'gpt-3.5-turbo-0125',
+  //model: 'gpt-4-turbo-preview',
 
   /**
    * @param {Number | null} frequency_penalty Number between -2.0 and 2.0. 
