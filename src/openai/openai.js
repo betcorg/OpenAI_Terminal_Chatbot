@@ -30,12 +30,12 @@ export const createChatCompletion = async (messages) => {
         stream,
     });
 
-    const [responseStream, toolStream] = completion.tee();
+    const [validationStream, responseStream] = completion.tee();
 
-    const result = await isItToolCall(responseStream);
+    const result = await isItToolCall(validationStream);
 
     if (result.tool) {
-        const currentTools = await getToolsData(toolStream);
+        const currentTools = await getToolsData(responseStream);
         // console.log(tools);
         await handleToolCall(currentTools, messages, openaiModel);
 
@@ -43,7 +43,7 @@ export const createChatCompletion = async (messages) => {
 
         let response = '';
 
-        for (const chunk of result.chunks) {
+        for await (const chunk of responseStream) {
             const textChunk = chunk.choices[0].delta.content;
             await delay(20);
             response = await chunkFormatter(textChunk, response);

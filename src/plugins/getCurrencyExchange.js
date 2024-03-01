@@ -11,11 +11,11 @@ export const get_currency_exchange = {
             "properties": {
                 "base_currency": {
                     "type": "string",
-                    "description": "The ISO 4217 Three Letter Currency Codes. Ej, 'USD', 'EUR', 'MXN'",
+                    "description": "The ISO 4217 Three Letter Currency Codes. e.g. 'USD', 'EUR', 'MXN'",
                 },
                 "target_currency": {
                     "type": "string",
-                    "description": "The ISO 4217 Three Letter Currency Codes. Ej, 'USD', 'EUR', 'MXN'",
+                    "description": "The ISO 4217 Three Letter Currency Codes. e.g, 'USD', 'EUR', 'MXN'",
                 },
             },
             "required": ["base_currency", "target_currency"],
