@@ -1,4 +1,4 @@
-import 'dotenv/config.js';
+import 'dotenv/config';
 import readline from 'readline';
 import chalk from 'chalk';
 import { config } from './config.js';

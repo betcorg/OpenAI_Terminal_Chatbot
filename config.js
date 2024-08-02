@@ -15,8 +15,8 @@ export const config = {
    * details on which models work with the Chat API. https://platform.openai.com/docs/modelsmodel-endpoint-compatibility 
    */
 
-  model: 'gpt-3.5-turbo-0125',
-  //model: 'gpt-4-turbo-preview',
+  model: 'gpt-3.5-turbo',
+  // model: 'gpt-4-turbo-preview',
 
   /**
    * @param {Number | null} frequency_penalty Number between -2.0 and 2.0. 
